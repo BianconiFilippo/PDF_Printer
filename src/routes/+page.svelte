@@ -1,6 +1,6 @@
 <script lang="ts">
     import { jsPDF } from "jspdf";
-    import "jspdf-autotable";
+    import autoTable from "jspdf-autotable";
 
     const fechaHoy = new Date();
     const año = fechaHoy.getFullYear();
@@ -9,6 +9,7 @@
     const fechaFormateada = `${año}-${mes < 10 ? "0" + mes : mes}-${
         dia < 10 ? "0" + dia : dia
     }`;
+
     let usuarios = [
         {
             id: 1,
@@ -30,13 +31,46 @@
         nuevoUsuario.email = "";
     }
 
+    function urlPDF() {
+        const doc = new jsPDF();
+        doc.text("Pagina a generar:", 10, 10);
+        doc.text(fechaFormateada, 170, 10);
+        doc.setLineWidth(0.75);
+        doc.line(10, 13, 200, 13);
+        autoTable(doc, {
+            margin: 20,
+            head: [["Id", "Nombre", "Email"]],
+            body: usuarios.map((x) => {
+                return [x.id.toString(), x.name, x.email];
+            }),
+        });
+        doc.text(
+            "© 2024 Informe Simple. Todos los derechos reservados.",
+            10,
+            290,
+        );
+        doc.autoPrint({ variant: "non-conform" });
+        doc.save("autoprint.pdf");
+    }
     function generarPDF() {
         const doc = new jsPDF();
         doc.text("Pagina a generar:", 10, 10);
         doc.text(fechaFormateada, 170, 10);
         doc.setLineWidth(0.75);
         doc.line(10, 13, 200, 13);
-        doc.save("a4.pdf");
+        autoTable(doc, {
+            margin: 20,
+            head: [["Id", "Nombre", "Email"]],
+            body: usuarios.map((x) => {
+                return [x.id.toString(), x.name, x.email];
+            }),
+        });
+        doc.text(
+            "© 2024 Informe Simple. Todos los derechos reservados.",
+            10,
+            290,
+        );
+        doc.save("ListaUsuarios.pdf");
         return;
     }
 </script>
@@ -70,13 +104,14 @@
     </div>
     <div class="flex gap-2 justify-center py-5">
         <button
-            class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800"
-            >Scan (HTML)</button
+            on:click={urlPDF}
+            class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 w-32"
+            >Download and print</button
         >
         <button
             on:click={generarPDF}
-            class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700 focus:outline-none focus:shadow-outline-blue active:bg-red-800"
-            >Native</button
+            class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-700 focus:outline-none focus:shadow-outline-blue active:bg-red-800 w-32"
+            >Download</button
         >
     </div>
 </div>
@@ -109,14 +144,6 @@
                 {/each}
             </tbody>
         </table>
-        <section>
-            <h2>Próximas Tareas</h2>
-            <ol>
-                <li>Planificación para el próximo mes.</li>
-                <li>Implementación de mejoras sugeridas por los usuarios.</li>
-            </ol>
-        </section>
-
         <footer class="py-3">
             <p>&copy; 2024 Informe Simple. Todos los derechos reservados.</p>
         </footer>
